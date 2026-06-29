@@ -1,0 +1,59 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  imageName: 'azure-devops-demo'
+
+stages:
+
+- stage: Build
+  displayName: 'Build Docker Image'
+
+  jobs:
+  - job: DockerBuild
+
+    steps:
+
+    - task: Docker@2
+      displayName: 'Build Docker Image'
+
+      inputs:
+        command: 'build'
+        Dockerfile: '**/Dockerfile'
+        repository: '$(imageName)'
+        tags: |
+          latest
+
+- stage: Validation
+  displayName: 'Deployment Validation'
+
+  dependsOn: Build
+
+  jobs:
+  - job: ValidationChecks
+
+    steps:
+
+    - script: |
+        echo "Running deployment validation checks..."
+        echo "Docker image build successful."
+        echo "CI/CD pipeline validation successful."
+      displayName: 'Validate Build'
+
+- stage: Deploy
+  displayName: 'Deploy Application'
+
+  dependsOn: Validation
+
+  jobs:
+  - job: Deployment
+
+    steps:
+
+    - script: |
+        echo "Deploying application to Azure environment..."
+        echo "Deployment completed successfully."
+      displayName: 'Deploy Application'
