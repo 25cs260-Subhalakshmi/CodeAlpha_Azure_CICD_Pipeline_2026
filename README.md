@@ -127,7 +127,7 @@ A Linux-based Azure App Service was provisioned to host and serve the containeri
 - Managed infrastructure
 - Container deployment support
 
-![Azure App Service](screenshots/web-app-created.png)
+![Azure App Service](screenshots/web-app-overview.png)
 
 ---
 
@@ -142,7 +142,7 @@ Azure CLI was installed and configured to manage cloud resources directly from t
 - Subscription integration
 - Automation readiness
 
-![Azure CLI Login](screenshots/azure-cli-login-success.png)
+![Azure CLI Login](screenshots/azure-cli-login-start.png)
 
 ---
 
@@ -232,7 +232,7 @@ This screenshot demonstrates the successful deployment of Azure Container Regist
 
 This screenshot shows the successful provisioning of Azure App Service that will host the containerized application.
 
-![Azure App Service](screenshots/web-app-created.png)
+![Azure App Service](screenshots/container-configuration.png)
 
 ---
 
@@ -240,7 +240,7 @@ This screenshot shows the successful provisioning of Azure App Service that will
 
 This screenshot verifies successful authentication with Azure using Azure CLI and Azure for Students subscription.
 
-![Azure CLI Login](screenshots/azure-cli-login-success.png)
+![Azure CLI Login](screenshots/azure-cli-logged-in.png)
 
 ---
 
