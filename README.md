@@ -142,7 +142,7 @@ Azure CLI was installed and configured to manage cloud resources directly from t
 - Subscription integration
 - Automation readiness
 
-![Azure CLI Login](screenshots/azure-cli-login-start.png)
+![Azure CLI Login](screenshots/azure-cli-login start.png)
 
 ---
 
