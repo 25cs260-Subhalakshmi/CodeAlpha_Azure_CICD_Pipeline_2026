@@ -1,0 +1,24 @@
+trigger: none # Manual trigger only for verification
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+# 1. Verify the Azure Subscription Connection
+- task: AzureCLI@2
+  displayName: 'Verify Azure Subscription Connection'
+  inputs:
+    azureSubscription: 'azure-subscription-connection'
+    scriptType: 'bash'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      echo "Testing connection to Azure..."
+      az account show --query "{subscriptionName:name, subscriptionId:id}" --output table
+      echo "Success! Azure Subscription connection is active and verified."
+
+# 2. Verify the Docker Registry Connection
+- task: Docker@2
+  displayName: 'Verify Docker Registry Connection'
+  inputs:
+    containerRegistry: 'acr-service-connection'
+    command: 'login'
