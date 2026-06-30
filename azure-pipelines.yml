@@ -6,54 +6,72 @@ pool:
 
 variables:
   imageName: 'azure-devops-demo'
+  acrLoginServer: 'subhalakshmidevopsacr2026.azurecr.io'
+  dockerRegistryServiceConnection: 'acr-service-connection'
+  azureSubscriptionServiceConnection: 'azure-subscription-connection'
+  webAppName: 'subhalakshmi-devops-webapp'
+  tag: '$(Build.BuildId)'
 
 stages:
 
 - stage: Build
-  displayName: 'Build Docker Image'
-
+  displayName: 'Build and Push Docker Image to ACR'
   jobs:
-  - job: DockerBuild
-
+  - job: BuildAndPush
+    displayName: 'Docker Build & Push'
     steps:
-
     - task: Docker@2
-      displayName: 'Build Docker Image'
-
+      displayName: 'Build and push image to ACR'
       inputs:
-        command: 'build'
-        Dockerfile: '**/Dockerfile'
+        containerRegistry: '$(dockerRegistryServiceConnection)'
         repository: '$(imageName)'
+        command: 'buildAndPush'
+        Dockerfile: '**/Dockerfile'
         tags: |
+          $(tag)
           latest
 
 - stage: Validation
   displayName: 'Deployment Validation'
-
   dependsOn: Build
-
   jobs:
   - job: ValidationChecks
-
     steps:
-
     - script: |
-        echo "Running deployment validation checks..."
-        echo "Docker image build successful."
-        echo "CI/CD pipeline validation successful."
-      displayName: 'Validate Build'
+        echo "Docker image $(imageName):$(tag) was built and pushed to $(acrLoginServer)."
+        echo "Image tag for this run: $(tag)"
+        echo "Validation passed. Proceeding to deployment."
+      displayName: 'Validate Build Output'
 
 - stage: Deploy
-  displayName: 'Deploy Application'
-
+  displayName: 'Deploy to Azure App Service'
   dependsOn: Validation
-
   jobs:
   - job: Deployment
-
+    displayName: 'Deploy Container to App Service'
     steps:
+    - task: AzureWebAppContainer@1
+      displayName: 'Deploy to App Service'
+      inputs:
+        azureSubscription: '$(azureSubscriptionServiceConnection)'
+        appName: '$(webAppName)'
+        containers: '$(acrLoginServer)/$(imageName):$(tag)'
 
+- stage: Monitor
+  displayName: 'Post-Deployment Monitoring'
+  dependsOn: Deploy
+  jobs:
+  - job: HealthCheck
+    displayName: 'Verify Application Health'
+    steps:
     - script: |
-        echo "Deploying application to Azure environment..."
-        echo "Deployment completed successfully."
-      displayName: 'Deploy Application'
+        echo "Waiting for App Service to finish restarting with the new container..."
+        sleep 30
+        STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://$(webAppName).azurewebsites.net)
+        echo "Application responded with HTTP status: $STATUS"
+        if [ "$STATUS" -eq 200 ]; then
+          echo "✅ Pipeline execution successful. Application is live and healthy."
+        else
+          echo "##vso[task.logissue type=warning]Application returned HTTP $STATUS instead of 200."
+        fi
+      displayName: 'Check Live App Health'
